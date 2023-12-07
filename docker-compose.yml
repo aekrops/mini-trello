@@ -12,10 +12,20 @@ services:
     build:
       context: ./backend
       dockerfile: build/Dockerfile
+    volumes:
+      - ./.env:/backend/.env  # Maps .env from your host to /app/.env in the container
+
     ports:
       - "8080:8080"
 
   db:
     image: amazon/dynamodb-local
+    hostname: dynamodblocal
+    container_name: dynamodb-local
+    command: "-jar DynamoDBLocal.jar -sharedDb -dbPath /data"
+    volumes:
+      - ./dynamodb-data:/data
     ports:
       - "8000:8000"
+    expose:
+      - "8000"
