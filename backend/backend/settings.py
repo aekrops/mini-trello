@@ -11,21 +11,39 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
 from pathlib import Path
+from decouple import config
+
+from backend.dynamodb_config import setup_dynamodb
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# AWS
+DYNAMODB_ENDPOINT_URL = config('DYNAMODB_ENDPOINT_URL')
+AWS_ACCESS_KEY_ID = config('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = config('AWS_SECRET_ACCESS_KEY')
+AWS_REGION = config('AWS_REGION_NAME')
+
+setup_dynamodb()
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-xv5$bj&)bb$rcj6w03bp$u=0#h^pga4gagel0f+4vw-=e54rw%'
+SECRET_KEY = config("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = config("DEBUG", default=False, cast=bool)
 
-ALLOWED_HOSTS = []
+
+ALLOWED_HOSTS = [
+    '127.0.0.1',
+    'localhost',
+]
+
+CORS_ORIGIN_WHITELIST = [
+    "http://localhost:3000",
+]
 
 
 # Application definition
@@ -37,11 +55,22 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    # apps
+    'api',
+    # other installed apps
+    'graphene_django',
+    'corsheaders',
 ]
+
+GRAPHENE = {
+    'SCHEMA': 'backend.schema.schema'
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    # CorsMiddleware should be before CommonMiddleware
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
