@@ -1,26 +1,21 @@
 import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import Board from './components/Board';
+import { useQuery } from '@apollo/client';
+import { ALL_LISTS_QUERY } from './apollo/queries';
+import ErrorBoundary from './ErrorBoundary'
+
 
 function App() {
+  const { loading, error, data } = useQuery(ALL_LISTS_QUERY);
+
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>Error :(</p>;
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+    <ErrorBoundary>
+      <Board propsLists={data.allLists} />
+    </ErrorBoundary>
+    );
 }
 
 export default App;
