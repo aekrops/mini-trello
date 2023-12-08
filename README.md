@@ -1,6 +1,10 @@
 # Mini Trello
 ## “Mini Trello/Kanban” interface - With Drag &amp; Drop of cards between columns
 
+
+https://github.com/aekrops/mini-trello/assets/55202411/78ac7a4f-ec83-41cf-8f1c-2f2864a9ebb4
+
+
 ### Steps to run application:
 - `docker compose build` or `docker-compose build`
 - `docker compose up -d db`
