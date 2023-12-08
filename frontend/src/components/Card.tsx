@@ -51,8 +51,6 @@ function Card({ card, index, onDeleteCard }: CardProps) {
   };
 
   const handleSave = () => {
-    console.log(card.cardId)
-    console.log("Title ", title)
     updateCard({
       variables: {
         cardId: card.cardId,

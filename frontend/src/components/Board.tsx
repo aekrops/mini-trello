@@ -26,7 +26,9 @@ function Board({ propsLists }: BoardProps) {
         refetchQueries: [{ query: ALL_LISTS_QUERY }],
     });
 
-    const [updateListItems] = useMutation(UPDATE_LIST_ITEMS_MUTATION);
+    const [updateListItems] = useMutation(UPDATE_LIST_ITEMS_MUTATION, {
+        refetchQueries: [{ query: ALL_CARDS_QUERY }],
+    });
     
     const [createCard] = useMutation(CREATE_CARD_MUTATION, {
         refetchQueries: [{ query: ALL_LISTS_QUERY }],
@@ -59,22 +61,19 @@ function Board({ propsLists }: BoardProps) {
                 listName: cardListName,
             },
         }).then((response) => {
-            let currentItems = [...lists.filter(list => list.name === cardListName)[0].items]
-            console.log("Old currentItems ", currentItems)
-            
-            const cardId: string = response.data.createCard.card.cardId
-            currentItems.push(cardId)
-            console.log(cardId)
-            console.log("New currentItems ", currentItems)
-            const updatedLists  = lists.map(list => {
+            const cardId = response.data.createCard.card.cardId;
+            const updatedLists = lists.map(list => {
                 if (list.name === cardListName) {
-                    return {...list, items: currentItems}
+                    const newItems = [...list.items, cardId];
+                    return { ...list, items: newItems };
                 }
                 return list;
-            })
+            });
             
-            handleUpdateListItems(cardListName, currentItems)
-            setLists(updatedLists)
+            const updatedItems = [...updatedLists.filter(list => list.name === cardListName)[0].items]
+            setLists(updatedLists);
+            handleUpdateListItems(cardListName, updatedItems);
+
             setCardTitle('');
             setCardDescription('');
             setCardListName(lists[0].name);
@@ -148,7 +147,6 @@ function Board({ propsLists }: BoardProps) {
         updateListItems({ variables: { listName, items } })
             .then(response => {
                 console.log("List items updated successfully", response);
-                console.log("items: ", items)
             })
             .catch(error => {
             // Handle error
@@ -173,8 +171,6 @@ function Board({ propsLists }: BoardProps) {
                 if (list.name === destination.droppableId) {
                     updatedItems = [...list.items].filter(item => item !== draggableId);
                     updatedItems.splice(destination.index, 0, draggableId); // Insert at new position
-                    console.log(draggableId)
-                    console.log(updatedItems)
                     return {...list, items: updatedItems };
                 } else {
                     return list;
@@ -201,7 +197,6 @@ function Board({ propsLists }: BoardProps) {
         }
         setLists(updatedLists)
         handleUpdateListItems(destination.droppableId, updatedItems)
-        console.log("HI HELLO OHAIYO: ", updatedItems)
         
        
     };
