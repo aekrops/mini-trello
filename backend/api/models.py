@@ -7,7 +7,7 @@ from typing import List as Lt
 from operator import itemgetter
 
 from boto3.dynamodb.conditions import Key
-from utils.dynamodb import get_dynamodb_table
+from utils.dynamodb import get_dynamodb_table, get_items_by_table
 
 logger = logging.getLogger(__name__)
 
@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 class List:
     def __init__(self, name: str, items: Lt[Any] = None):
         self.name = name
-        self.items = items if items else []
+        self.items = items or []
 
     def save(self) -> None:
         """Saves the list to the DynamoDB"""
@@ -119,9 +119,7 @@ class List:
     def all() -> Lt[Dict[str, Any]]:
         """Retrieve all lists from the DynamoDB table or create default if empty."""
         try:
-            table = get_dynamodb_table('Lists')
-            response = table.scan()
-            items = response.get('Items', [])
+            items = get_items_by_table('Lists')
 
             if not items:
                 default_list = List(name="To Do")
@@ -142,7 +140,7 @@ class Card:
         list_name: Optional[str] = "To Do",
         due_date=None
     ):
-        self.card_id = str(uuid.uuid4()) if not card_id else card_id
+        self.card_id = card_id or str(uuid.uuid4())
         self.title = title
         self.description = description
         self.list_name = list_name
@@ -200,9 +198,7 @@ class Card:
     def all() -> Lt[Dict[str, Any]]:
         """Retrieve all cards from the DynamoDB table."""
         try:
-            table = get_dynamodb_table('Cards')
-            response = table.scan()
-            return response.get('Items', [])
+            return get_items_by_table('Cards')
         except Exception as e:
             logger.error(f"Error retrieving all cards: {e}")
 
@@ -224,9 +220,7 @@ class Card:
     def all_sorted_by_list_name() -> Lt[Dict[str, Any]]:
         """Retrieve all cards and sort them by list_name."""
         try:
-            table = get_dynamodb_table('Cards')
-            response = table.scan()
-            items = response.get('Items', [])
+            items = get_items_by_table('Cards')
             sorted_items = sorted(items, key=itemgetter("list_name"))
             return sorted_items
         except Exception as e:
@@ -237,9 +231,7 @@ class Card:
     def all_grouped_by_list_name() -> dict:
         """Retrieve all cards and group them by list_name."""
         try:
-            table = get_dynamodb_table('Cards')
-            response = table.scan()
-            items = response.get('Items', [])
+            items = get_items_by_table('Cards')
 
             grouped_by_list_name = defaultdict(list)
             for item in items:
@@ -266,8 +258,6 @@ class Label:
     def all() -> Lt[Dict[str, Any]]:
         """Retrieve all labels from the DynamoDB table."""
         try:
-            table = get_dynamodb_table('Labels')
-            response = table.scan()
-            return response.get('Items', [])
+            return get_items_by_table('Labels')
         except Exception as e:
             logger.error(f"Error retrieving all labels: {e}")

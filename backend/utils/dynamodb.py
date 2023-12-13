@@ -16,3 +16,7 @@ def get_dynamodb_table(table_name):
     return dynamodb.Table(table_name)
 
 
+def get_items_by_table(table_name):
+    table = get_dynamodb_table(table_name)
+    response = table.scan()
+    return response.get("Items", [])
